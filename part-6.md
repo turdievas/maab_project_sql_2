@@ -45,3 +45,5 @@ After doing all that
 We can check if all is working
 We got success message.
 ![Image](https://github.com/user-attachments/assets/b0eb39de-c8b8-4ece-a432-ab84d272a93d)
+
+In this order we can add other stored procedures as well.
