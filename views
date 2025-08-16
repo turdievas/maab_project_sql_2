@@ -1,0 +1,64 @@
+--1
+CREATE VIEW vw_StoreSalesSummary AS
+select SUM(list_price)/ SUM(DISTINCT o.order_id) as AOV_per_store, SUM(DISTINCT o.order_id) as orders, SUM(list_price) as revenue, s.store_id from order_items i
+join orders o
+on i.order_id = o.order_id
+join stores s
+on o.store_id = s.store_id
+group by s.store_id
+order by store_id
+
+--2
+CREATE VIEW vw_TopSellingProducts AS
+select p.product_name, SUM(o.list_price * quantity) as total_sale from products p
+join
+order_items o
+on p.product_id = o.product_id
+group by p.product_id, p.product_name
+order by total_sale DESC
+
+--3
+CREATE VIEW vw_InventoryStatus AS
+select product_name, store_name, quantity from stocks s
+join 
+products p
+on s.product_id = p.product_id
+join stores
+on stores.STORE_ID = s.store_id
+where quantity < 20
+order by quantity
+
+--4
+CREATE VIEW vw_StaffPerformance AS
+SELECT 
+    stf.staff_id,
+    stf.first_name + ' ' + stf.last_name AS staff_name,
+    COUNT(DISTINCT o.order_id) AS total_orders_handled,
+    SUM(oi.quantity * oi.list_price * (1 - oi.discount)) AS total_revenue_handled
+FROM staffs stf
+JOIN orders o ON stf.staff_id = o.staff_id
+JOIN order_items oi ON o.order_id = oi.order_id
+GROUP BY stf.staff_id, stf.first_name, stf.last_name;
+--5
+CREATE VIEW vw_RegionalTrends AS
+SELECT 
+    st.city,
+    st.state,
+    SUM(oi.quantity * oi.list_price * (1 - oi.discount)) AS total_revenue
+FROM stores st
+JOIN orders o ON st.store_id = o.store_id
+JOIN order_items oi ON o.order_id = oi.order_id
+GROUP BY st.city, st.state;
+
+
+-- 6. Sales by Category (Volume and Revenue)
+CREATE VIEW vw_SalesByCategory AS
+SELECT 
+    c.category_id,
+    c.category_name,
+    SUM(oi.quantity) AS total_quantity_sold,
+    SUM(oi.quantity * oi.list_price * (1 - oi.discount)) AS total_revenue
+FROM categories c
+JOIN products p ON c.category_id = p.category_id
+JOIN order_items oi ON p.product_id = oi.product_id
+GROUP BY c.category_id, c.category_name;
